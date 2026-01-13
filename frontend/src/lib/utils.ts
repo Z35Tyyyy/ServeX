@@ -1,7 +1,21 @@
 export const generateSessionId = (): string => `${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 15)}`;
 
+// Store session token from QR scan (critical for security)
+export const getSessionToken = (tableId: string): string | null => {
+    return sessionStorage.getItem(`session_${tableId}`);
+};
+
+export const setSessionToken = (tableId: string, token: string): void => {
+    sessionStorage.setItem(`session_${tableId}`, token);
+};
+
+export const clearSessionToken = (tableId: string): void => {
+    sessionStorage.removeItem(`session_${tableId}`);
+};
+
+// Legacy session ID for backwards compatibility
 export const getSessionId = (tableId: string): string => {
-    const key = `session_${tableId}`;
+    const key = `sessionId_${tableId}`;
     let id = sessionStorage.getItem(key);
     if (!id) { id = generateSessionId(); sessionStorage.setItem(key, id); }
     return id;
@@ -21,11 +35,11 @@ export const timeAgo = (date: string | Date): string => {
 };
 
 export const getStatusColor = (status: string): string => {
-    const colors: Record<string, string> = { CREATED: 'badge-warning', PAID: 'badge-primary', PREPARING: 'badge-warning', READY: 'badge-success', SERVED: 'badge-success' };
+    const colors: Record<string, string> = { CREATED: 'badge-warning', PAID: 'badge-primary', PREPARING: 'badge-warning', READY: 'badge-success', SERVED: 'badge-success', CANCELLED: 'badge-error' };
     return colors[status] || 'badge-primary';
 };
 
 export const getStatusText = (status: string): string => {
-    const texts: Record<string, string> = { CREATED: 'Pending Payment', PAID: 'Order Received', PREPARING: 'Preparing', READY: 'Ready', SERVED: 'Served' };
+    const texts: Record<string, string> = { CREATED: 'Pending Payment', PAID: 'Order Received', PREPARING: 'Preparing', READY: 'Ready', SERVED: 'Served', CANCELLED: 'Cancelled' };
     return texts[status] || status;
 };

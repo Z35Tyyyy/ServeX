@@ -1,24 +1,53 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Minus, Trash2, Loader2, Receipt, ShoppingBag, Sparkles } from 'lucide-react';
+import { ArrowLeft, Plus, Minus, Trash2, Loader2, Receipt, ShoppingBag, Sparkles, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '../store/cartStore';
 import { createOrder } from '../lib/api';
-import { formatPrice, getSessionId } from '../lib/utils';
+import { formatPrice, getSessionToken } from '../lib/utils';
 
 export default function Cart() {
     const { tableId } = useParams<{ tableId: string }>();
     const navigate = useNavigate();
     const { items, updateQuantity, removeItem, getSubtotal, getTax, getServiceCharge, getTotal } = useCartStore();
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleCheckout = async () => {
         if (!tableId || items.length === 0) return;
+
+        // Get session token (required for security)
+        const sessionToken = getSessionToken(tableId);
+        if (!sessionToken) {
+            setError('Session expired. Please scan the QR code again.');
+            return;
+        }
+
         setLoading(true);
+        setError('');
+
         try {
-            const res = await createOrder({ tableId, items: items.map((i) => ({ menuItemId: i.menuItemId, quantity: i.quantity, specialInstructions: i.specialInstructions })), sessionId: getSessionId(tableId) });
+            const res = await createOrder({
+                tableId,
+                items: items.map((i) => ({
+                    menuItemId: i.menuItemId,
+                    quantity: i.quantity,
+                    specialInstructions: i.specialInstructions
+                })),
+                sessionToken, // Include session token for server validation
+            });
             navigate(`/payment/${res.data.order._id}`);
-        } catch (e: any) { toast.error(e.response?.data?.message || 'Failed to create order'); setLoading(false); }
+        } catch (e: any) {
+            const msg = e.response?.data?.message || 'Failed to create order';
+            setError(msg);
+            toast.error(msg);
+
+            // If session expired, redirect to scan QR again
+            if (e.response?.status === 401) {
+                setTimeout(() => navigate(`/t/${tableId}`), 2000);
+            }
+            setLoading(false);
+        }
     };
 
     if (items.length === 0) return (
@@ -34,7 +63,6 @@ export default function Cart() {
 
     return (
         <div style={{ minHeight: '100vh', paddingBottom: 100 }}>
-            {/* Header */}
             <header style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '20px 16px', background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', borderBottom: '1px solid var(--glass-border)', position: 'sticky', top: 0, zIndex: 100 }}>
                 <button onClick={() => navigate(`/menu/${tableId}`)} className="btn btn-secondary" style={{ padding: 10 }}><ArrowLeft size={20} /></button>
                 <div>
@@ -43,8 +71,15 @@ export default function Cart() {
                 </div>
             </header>
 
-            {/* Items */}
             <div style={{ padding: 16 }}>
+                {/* Error Message */}
+                {error && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 16, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--color-error)', borderRadius: 12, marginBottom: 16, color: 'var(--color-error)' }}>
+                        <AlertCircle size={20} />
+                        <span>{error}</span>
+                    </div>
+                )}
+
                 {items.map((item, idx) => (
                     <div key={item.menuItemId} className="card animate-slideUp" style={{ display: 'flex', gap: 16, padding: 16, marginBottom: 12, animationDelay: `${idx * 50}ms` }}>
                         <div style={{ width: 70, height: 70, background: 'var(--gradient-primary-subtle)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>
@@ -65,7 +100,6 @@ export default function Cart() {
                     </div>
                 ))}
 
-                {/* Bill Summary */}
                 <div className="card" style={{ padding: 24, marginTop: 24 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
                         <Receipt size={20} style={{ color: 'var(--color-primary-light)' }} />
@@ -87,7 +121,6 @@ export default function Cart() {
                 </div>
             </div>
 
-            {/* Checkout Bar */}
             <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: 16, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', borderTop: '1px solid var(--glass-border)' }}>
                 <button
                     onClick={handleCheckout}

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Utensils, Wifi, Clock, Shield, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 import { getTable } from '../lib/api';
 import { useCartStore } from '../store/cartStore';
+import { setSessionToken } from '../lib/utils';
 
 export default function TableLanding() {
     const { tableId } = useParams<{ tableId: string }>();
@@ -14,7 +15,20 @@ export default function TableLanding() {
 
     useEffect(() => {
         if (!tableId) { setError('Invalid table'); setLoading(false); return; }
-        getTable(tableId).then((r) => { setTable(r.data); setTableId(tableId); setLoading(false); }).catch(() => { setError('Table not found'); setLoading(false); });
+        getTable(tableId)
+            .then((r) => {
+                setTable(r.data);
+                setTableId(tableId);
+                // Store session token from server (CRITICAL for order security)
+                if (r.data.sessionToken) {
+                    setSessionToken(tableId, r.data.sessionToken);
+                }
+                setLoading(false);
+            })
+            .catch((err) => {
+                setError(err.response?.data?.message || 'Table not found');
+                setLoading(false);
+            });
     }, [tableId, setTableId]);
 
     if (loading) return (
@@ -36,23 +50,19 @@ export default function TableLanding() {
 
     return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-            {/* Decorative elements */}
             <div style={{ position: 'fixed', top: '-50%', right: '-30%', width: '80vw', height: '80vw', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
             <div style={{ position: 'fixed', bottom: '-30%', left: '-20%', width: '60vw', height: '60vw', background: 'radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
             <div className="animate-fadeIn" style={{ textAlign: 'center', maxWidth: 400, position: 'relative' }}>
-                {/* Logo */}
                 <div className="animate-float" style={{ width: 100, height: 100, background: 'var(--gradient-primary)', borderRadius: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 32px', boxShadow: 'var(--shadow-glow)' }}>
                     <Utensils size={50} color="white" />
                 </div>
 
-                {/* Brand */}
                 <h1 style={{ fontSize: 48, fontWeight: 800, marginBottom: 8 }}>
                     <span className="text-gradient">ServeX</span>
                 </h1>
                 <p style={{ color: 'var(--color-text-muted)', marginBottom: 40, fontSize: 18 }}>Digital Dining Experience</p>
 
-                {/* Table Card */}
                 <div className="card" style={{ padding: 24, marginBottom: 32 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 8 }}>
                         <Sparkles size={20} style={{ color: 'var(--color-warning)' }} />
@@ -63,7 +73,6 @@ export default function TableLanding() {
                     </div>
                 </div>
 
-                {/* Features */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
                     {[
                         { icon: Wifi, label: 'Instant' },
@@ -77,7 +86,6 @@ export default function TableLanding() {
                     ))}
                 </div>
 
-                {/* CTA Button */}
                 <button
                     onClick={() => navigate(`/menu/${tableId}`)}
                     className="btn btn-primary btn-lg"
