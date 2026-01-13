@@ -7,12 +7,13 @@ import { getSocket, connectSocket, joinKitchen, leaveKitchen } from '../../lib/s
 import { useAuthStore } from '../../store/authStore';
 import { timeAgo } from '../../lib/utils';
 
-interface Order { _id: string; tableId: { tableNumber: number }; items: { name: string; quantity: number; specialInstructions?: string }[]; status: 'PAID' | 'PREPARING' | 'READY'; createdAt: string; }
+interface Order { _id: string; tableId: { tableNumber: number }; items: { name: string; quantity: number; specialInstructions?: string }[]; status: 'PAID' | 'PREPARING' | 'READY' | 'SERVED'; createdAt: string; }
 
 const statusConfig = {
     PAID: { label: 'New', bg: 'rgba(139, 92, 246, 0.15)', border: 'var(--color-primary)', color: 'var(--color-primary-light)', nextLabel: 'Start Preparing', gradient: 'var(--gradient-primary)' },
     PREPARING: { label: 'Preparing', bg: 'rgba(234, 179, 8, 0.15)', border: 'var(--color-warning)', color: 'var(--color-warning)', nextLabel: 'Mark Ready', gradient: 'var(--gradient-secondary)' },
     READY: { label: 'Ready', bg: 'rgba(34, 197, 94, 0.15)', border: 'var(--color-success)', color: 'var(--color-success)', nextLabel: 'Mark Served', gradient: 'var(--gradient-success)' },
+    SERVED: { label: 'Served', bg: 'rgba(34, 197, 94, 0.15)', border: 'var(--color-success)', color: 'var(--color-success)', nextLabel: '', gradient: 'var(--gradient-success)' },
 };
 
 export default function KitchenDashboard() {

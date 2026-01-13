@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CreditCard, Loader2, CheckCircle, XCircle } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { getOrder, createPayment, verifyPayment } from '../lib/api';
 import { useCartStore } from '../store/cartStore';
 import { formatPrice } from '../lib/utils';
