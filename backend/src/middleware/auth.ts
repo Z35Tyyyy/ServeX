@@ -12,8 +12,8 @@ declare global {
 
 export const generateToken = (userId: string): string => {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET as string, {
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-    });
+        expiresIn: '7d',
+    } as jwt.SignOptions);
 };
 
 export const protect = async (req: Request, res: Response, next: NextFunction) => {
