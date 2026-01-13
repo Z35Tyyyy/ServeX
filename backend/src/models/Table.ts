@@ -12,8 +12,8 @@ export interface ITable extends Document {
 
 const tableSchema = new Schema<ITable>({
     tableNumber: { type: Number, required: true, unique: true },
-    qrCodeUrl: { type: String, required: true },
-    qrCodeData: { type: String, required: true },
+    qrCodeUrl: { type: String, default: '' },
+    qrCodeData: { type: String, default: '' },
     isActive: { type: Boolean, default: true },
     capacity: { type: Number, default: 4 },
 }, { timestamps: true });

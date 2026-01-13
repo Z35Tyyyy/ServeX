@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Utensils, Loader2 } from 'lucide-react';
+import { Utensils, Wifi, Clock, Shield, ChevronRight, Loader2, Sparkles } from 'lucide-react';
 import { getTable } from '../lib/api';
 import { useCartStore } from '../store/cartStore';
 
@@ -17,16 +17,79 @@ export default function TableLanding() {
         getTable(tableId).then((r) => { setTable(r.data); setTableId(tableId); setLoading(false); }).catch(() => { setError('Table not found'); setLoading(false); });
     }, [tableId, setTableId]);
 
-    if (loading) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="animate-spin" size={48} /></div>;
-    if (error) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}><p>{error}</p></div>;
+    if (loading) return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
+                <div style={{ width: 80, height: 80, background: 'var(--gradient-primary)', borderRadius: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', animation: 'glow 2s ease-in-out infinite' }}><Utensils size={40} color="white" /></div>
+                <Loader2 className="animate-spin" size={24} style={{ color: 'var(--color-primary)' }} />
+            </div>
+        </div>
+    );
+
+    if (error) return (
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
+            <div style={{ fontSize: 64 }}>😕</div>
+            <h2 style={{ fontSize: 24 }}>{error}</h2>
+            <p style={{ color: 'var(--color-text-muted)' }}>Please scan a valid QR code</p>
+        </div>
+    );
 
     return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-            <div style={{ textAlign: 'center', maxWidth: 400 }}>
-                <div style={{ width: 80, height: 80, background: 'var(--gradient-primary)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}><Utensils size={40} color="white" /></div>
-                <h1 style={{ fontSize: 32, marginBottom: 8, background: 'var(--gradient-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>ServeX</h1>
-                <p style={{ color: 'var(--color-text-muted)', marginBottom: 32 }}>Welcome to Table {table?.tableNumber}</p>
-                <button onClick={() => navigate(`/menu/${tableId}`)} style={{ width: '100%', padding: 16, background: 'var(--gradient-primary)', color: 'white', fontSize: 18, fontWeight: 600, borderRadius: 16, cursor: 'pointer' }}>View Menu</button>
+            {/* Decorative elements */}
+            <div style={{ position: 'fixed', top: '-50%', right: '-30%', width: '80vw', height: '80vw', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+            <div style={{ position: 'fixed', bottom: '-30%', left: '-20%', width: '60vw', height: '60vw', background: 'radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+            <div className="animate-fadeIn" style={{ textAlign: 'center', maxWidth: 400, position: 'relative' }}>
+                {/* Logo */}
+                <div className="animate-float" style={{ width: 100, height: 100, background: 'var(--gradient-primary)', borderRadius: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 32px', boxShadow: 'var(--shadow-glow)' }}>
+                    <Utensils size={50} color="white" />
+                </div>
+
+                {/* Brand */}
+                <h1 style={{ fontSize: 48, fontWeight: 800, marginBottom: 8 }}>
+                    <span className="text-gradient">ServeX</span>
+                </h1>
+                <p style={{ color: 'var(--color-text-muted)', marginBottom: 40, fontSize: 18 }}>Digital Dining Experience</p>
+
+                {/* Table Card */}
+                <div className="card" style={{ padding: 24, marginBottom: 32 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 8 }}>
+                        <Sparkles size={20} style={{ color: 'var(--color-warning)' }} />
+                        <span style={{ color: 'var(--color-text-secondary)' }}>You're at</span>
+                    </div>
+                    <div style={{ fontSize: 56, fontWeight: 800, lineHeight: 1 }}>
+                        <span className="text-gradient">Table {table?.tableNumber}</span>
+                    </div>
+                </div>
+
+                {/* Features */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 32 }}>
+                    {[
+                        { icon: Wifi, label: 'Instant' },
+                        { icon: Clock, label: 'Fast' },
+                        { icon: Shield, label: 'Secure' },
+                    ].map(({ icon: Icon, label }) => (
+                        <div key={label} style={{ padding: 16, background: 'var(--glass-bg)', backdropFilter: 'var(--glass-blur)', border: '1px solid var(--glass-border)', borderRadius: 16, textAlign: 'center' }}>
+                            <Icon size={24} style={{ color: 'var(--color-primary-light)', marginBottom: 8 }} />
+                            <p style={{ fontSize: 12, color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: 1 }}>{label}</p>
+                        </div>
+                    ))}
+                </div>
+
+                {/* CTA Button */}
+                <button
+                    onClick={() => navigate(`/menu/${tableId}`)}
+                    className="btn btn-primary btn-lg"
+                    style={{ width: '100%', padding: '18px 32px', fontSize: 18, borderRadius: 16 }}
+                >
+                    <span>View Menu</span>
+                    <ChevronRight size={24} />
+                </button>
+
+                <p style={{ marginTop: 16, fontSize: 12, color: 'var(--color-text-muted)' }}>
+                    Browse • Order • Pay • Enjoy
+                </p>
             </div>
         </div>
     );
