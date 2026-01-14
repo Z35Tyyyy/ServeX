@@ -59,6 +59,15 @@ export default function Cart() {
             navigate(`/payment/${res.data.order._id}`);
         } catch (e: any) {
             const msg = e.response?.data?.message || 'Failed to create order';
+            const pendingOrderId = e.response?.data?.orderId;
+
+            // If there's a pending order, navigate to its payment page
+            if (pendingOrderId) {
+                toast.error('Redirecting to your pending payment...');
+                navigate(`/payment/${pendingOrderId}`);
+                return;
+            }
+
             setError(msg);
             toast.error(msg);
 
