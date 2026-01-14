@@ -1,17 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Minus, Trash2, Loader2, Receipt, ShoppingBag, Sparkles, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCartStore } from '../store/cartStore';
 import { createOrder } from '../lib/api';
-import { formatPrice, getSessionToken } from '../lib/utils';
+import { formatPrice, getSessionToken, clearSessionToken } from '../lib/utils';
 
 export default function Cart() {
     const { tableId } = useParams<{ tableId: string }>();
     const navigate = useNavigate();
-    const { items, updateQuantity, removeItem, getSubtotal, getTax, getServiceCharge, getTotal } = useCartStore();
+    const { items, updateQuantity, removeItem, getSubtotal, getTax, getServiceCharge, getTotal, checkExpiry } = useCartStore();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [expired, setExpired] = useState(false);
+
+    // Check cart expiry on mount and periodically
+    useEffect(() => {
+        const wasExpired = checkExpiry();
+        if (wasExpired) {
+            setExpired(true);
+            if (tableId) clearSessionToken(tableId);
+            toast.error('Your session expired due to inactivity');
+        }
+
+        const interval = setInterval(() => {
+            if (checkExpiry()) {
+                setExpired(true);
+                if (tableId) clearSessionToken(tableId);
+                toast.error('Your session expired due to inactivity');
+            }
+        }, 30000); // Check every 30 seconds
+
+        return () => clearInterval(interval);
+    }, [checkExpiry, tableId]);
 
     const handleCheckout = async () => {
         if (!tableId || items.length === 0) return;
@@ -50,13 +71,14 @@ export default function Cart() {
         }
     };
 
-    if (items.length === 0) return (
+    // Show expired session screen
+    if (expired || items.length === 0) return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-            <div className="animate-float" style={{ fontSize: 80, marginBottom: 24 }}>🛒</div>
-            <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>Your cart is empty</h2>
-            <p style={{ color: 'var(--color-text-muted)', marginBottom: 32 }}>Add some delicious items!</p>
-            <button onClick={() => navigate(`/menu/${tableId}`)} className="btn btn-primary btn-lg">
-                <ShoppingBag size={20} /> Browse Menu
+            <div className="animate-float" style={{ fontSize: 80, marginBottom: 24 }}>{expired ? '⏰' : '🛒'}</div>
+            <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>{expired ? 'Session Expired' : 'Your cart is empty'}</h2>
+            <p style={{ color: 'var(--color-text-muted)', marginBottom: 32 }}>{expired ? 'Your cart was cleared due to inactivity' : 'Add some delicious items!'}</p>
+            <button onClick={() => navigate(`/t/${tableId}`)} className="btn btn-primary btn-lg">
+                <ShoppingBag size={20} /> {expired ? 'Scan QR Again' : 'Browse Menu'}
             </button>
         </div>
     );

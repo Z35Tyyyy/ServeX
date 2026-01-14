@@ -20,6 +20,17 @@ router.post('/create', paymentLimiter, async (req: Request, res: Response) => {
         if (!order) return res.status(404).json({ message: 'Order not found' });
         if (order.status !== 'CREATED') return res.status(400).json({ message: 'Order already paid' });
 
+        // Check for existing PENDING payment - allow retry without creating new Razorpay order
+        const existingPayment = await Payment.findOne({ orderId, status: 'PENDING' });
+        if (existingPayment) {
+            return res.json({
+                razorpayOrderId: existingPayment.razorpayOrderId,
+                amount: Math.round(existingPayment.amount * 100), // Convert to paise
+                currency: 'INR',
+                keyId: getRazorpayKeyId()
+            });
+        }
+
         const razorpayOrder = await createRazorpayOrder(order.totalAmount, orderId);
         await Payment.create({ orderId, razorpayOrderId: razorpayOrder.id, amount: order.totalAmount, status: 'PENDING' });
 
