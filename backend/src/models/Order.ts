@@ -15,11 +15,12 @@ export interface IOrder extends Document {
     tax: number;
     serviceCharge: number;
     totalAmount: number;
-    status: 'CREATED' | 'PAID' | 'PREPARING' | 'READY' | 'SERVED';
+    status: 'CREATED' | 'PENDING_CASH' | 'PAID' | 'PREPARING' | 'READY' | 'SERVED';
     paymentId?: Types.ObjectId;
     sessionId: string;
     customerName?: string;
     customerPhone?: string;
+    paymentMethod: 'ONLINE' | 'CASH';
     createdAt: Date;
     updatedAt: Date;
 }
@@ -39,11 +40,12 @@ const orderSchema = new Schema<IOrder>({
     tax: { type: Number, required: true },
     serviceCharge: { type: Number, required: true },
     totalAmount: { type: Number, required: true },
-    status: { type: String, enum: ['CREATED', 'PAID', 'PREPARING', 'READY', 'SERVED'], default: 'CREATED' },
+    status: { type: String, enum: ['CREATED', 'PENDING_CASH', 'PAID', 'PREPARING', 'READY', 'SERVED'], default: 'CREATED' },
     paymentId: { type: Schema.Types.ObjectId, ref: 'Payment' },
     sessionId: { type: String, required: true },
     customerName: { type: String },
     customerPhone: { type: String },
+    paymentMethod: { type: String, enum: ['ONLINE', 'CASH'], default: 'ONLINE' },
 }, { timestamps: true });
 
 orderSchema.index({ tableId: 1 });

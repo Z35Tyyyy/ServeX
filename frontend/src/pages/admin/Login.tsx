@@ -4,6 +4,7 @@ import { Utensils, Mail, Lock, Loader2, Sparkles, ArrowRight } from 'lucide-reac
 import toast from 'react-hot-toast';
 import { login } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
+import Footer from '../../components/Footer';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -110,6 +111,9 @@ export default function Login() {
                     </div>
                 </div>
             </div>
-        </div>
+            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}>
+                <Footer />
+            </div>
+        </div >
     );
 }

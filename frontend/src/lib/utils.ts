@@ -35,11 +35,11 @@ export const timeAgo = (date: string | Date): string => {
 };
 
 export const getStatusColor = (status: string): string => {
-    const colors: Record<string, string> = { CREATED: 'badge-warning', PAID: 'badge-primary', PREPARING: 'badge-warning', READY: 'badge-success', SERVED: 'badge-success', CANCELLED: 'badge-error' };
+    const colors: Record<string, string> = { CREATED: 'badge-warning', PENDING_CASH: 'badge-warning', PAID: 'badge-primary', PREPARING: 'badge-warning', READY: 'badge-success', SERVED: 'badge-success', CANCELLED: 'badge-error' };
     return colors[status] || 'badge-primary';
 };
 
 export const getStatusText = (status: string): string => {
-    const texts: Record<string, string> = { CREATED: 'Pending Payment', PAID: 'Order Received', PREPARING: 'Preparing', READY: 'Ready', SERVED: 'Served', CANCELLED: 'Cancelled' };
+    const texts: Record<string, string> = { CREATED: 'Pending Payment', PENDING_CASH: 'Pay at Counter', PAID: 'Order Received', PREPARING: 'Preparing', READY: 'Ready', SERVED: 'Served', CANCELLED: 'Cancelled' };
     return texts[status] || status;
 };

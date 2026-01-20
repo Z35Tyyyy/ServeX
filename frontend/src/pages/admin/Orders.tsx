@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Filter, Eye, Loader2 } from 'lucide-react';
-import { getAllOrders } from '../../lib/api';
+import { getAllOrders, updateOrderStatus } from '../../lib/api';
 import { formatPrice, formatDate, getStatusColor, getStatusText } from '../../lib/utils';
 
 interface Order { _id: string; tableId: { tableNumber: number } | null; items: { name: string; quantity: number; price: number }[]; totalAmount: number; status: string; createdAt: string; }
@@ -32,6 +32,7 @@ export default function Orders() {
                     <option value="PREPARING">Preparing</option>
                     <option value="READY">Ready</option>
                     <option value="SERVED">Served</option>
+                    <option value="PENDING_CASH">Pending Cash</option>
                 </select>
             </div>
             <div style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: 16, overflow: 'hidden' }}>
@@ -49,7 +50,34 @@ export default function Orders() {
                                     <td style={{ padding: 16 }}><button onClick={() => setExpanded(expanded === order._id ? null : order._id)} style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--color-border)', borderRadius: 8, color: 'var(--color-text-secondary)' }}><Eye size={16} /></button></td>
                                 </tr>
                                 {expanded === order._id && (
-                                    <tr><td colSpan={6} style={{ padding: 16, background: 'var(--color-bg-secondary)' }}><h4 style={{ fontSize: 14, marginBottom: 12, color: 'var(--color-text-secondary)' }}>Items</h4>{order.items.map((i, idx) => <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 14, color: 'var(--color-text-secondary)' }}><span>{i.quantity}x {i.name}</span><span>{formatPrice(i.price * i.quantity)}</span></div>)}</td></tr>
+                                    <tr><td colSpan={6} style={{ padding: 16, background: 'var(--color-bg-secondary)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <div>
+                                                <h4 style={{ fontSize: 14, marginBottom: 12, color: 'var(--color-text-secondary)' }}>Items</h4>
+                                                {order.items.map((i, idx) => <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 14, color: 'var(--color-text-secondary)', width: 300 }}><span>{i.quantity}x {i.name}</span><span>{formatPrice(i.price * i.quantity)}</span></div>)}
+                                            </div>
+                                            {order.status === 'PENDING_CASH' && (
+                                                <div style={{ padding: 16, background: '#fff3cd', border: '1px solid #ffeeba', borderRadius: 8, maxWidth: 300 }}>
+                                                    <h4 style={{ color: '#856404', fontSize: 16, marginBottom: 8, fontWeight: 700 }}>⚠️ Confirm Cash Payment</h4>
+                                                    <p style={{ fontSize: 13, color: '#856404', marginBottom: 12 }}>Customer requested to pay <b>{formatPrice(order.totalAmount)}</b> at counter.</p>
+                                                    <button
+                                                        className="btn btn-primary btn-sm"
+                                                        onClick={async () => {
+                                                            if (!confirm('Confirm that you have received ' + formatPrice(order.totalAmount) + ' cash?')) return;
+                                                            try {
+                                                                await updateOrderStatus(order._id, 'PAID');
+                                                                // Refresh orders
+                                                                const res = await getAllOrders({ page, limit: 20, status: statusFilter || undefined });
+                                                                setOrders(res.data.orders);
+                                                            } catch (e) { alert('Failed to update'); }
+                                                        }}
+                                                    >
+                                                        Confirm & Mark Paid
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </td></tr>
                                 )}
                             </>
                         ))}

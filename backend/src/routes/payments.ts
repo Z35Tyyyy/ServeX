@@ -62,4 +62,29 @@ router.post('/verify', async (req: Request, res: Response) => {
     }
 });
 
+router.post('/cash', async (req: Request, res: Response) => {
+    try {
+        const { orderId } = req.body;
+        const order = await Order.findById(orderId);
+        if (!order) return res.status(404).json({ message: 'Order not found' });
+        if (order.status !== 'CREATED') return res.status(400).json({ message: 'Order already paid/confirmed' });
+
+        // Update status to PAID (Confirmed for Kitchen) and method to CASH
+        const updatedOrder = await Order.findByIdAndUpdate(
+            orderId,
+            { status: 'PAID', paymentMethod: 'CASH' },
+            { new: true }
+        ).populate('tableId', 'tableNumber');
+
+        if (io && updatedOrder) {
+            io.to('kitchen').emit('order:new', { order: updatedOrder });
+            io.to(`order:${order._id}`).emit('order:statusUpdate', { orderId: order._id, status: 'PAID' });
+        }
+
+        res.json({ message: 'Order confirmed for cash payment', order: updatedOrder });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 export default router;

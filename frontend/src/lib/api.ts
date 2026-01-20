@@ -54,3 +54,4 @@ export const getAnalytics = () => api.get('/orders/analytics/summary');
 // Payments
 export const createPayment = (orderId: string) => api.post('/payments/create', { orderId });
 export const verifyPayment = (data: { orderId: string; razorpayOrderId: string; razorpayPaymentId: string; razorpaySignature: string }) => api.post('/payments/verify', data);
+export const confirmCashPayment = (orderId: string) => api.post('/payments/cash', { orderId });

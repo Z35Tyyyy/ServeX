@@ -55,31 +55,45 @@ export default function OrderTracking() {
                 {/* Status Tracker */}
                 <div className="card" style={{ padding: 24, marginBottom: 24, background: 'white' }}>
                     <h3 style={{ marginBottom: 24, fontFamily: 'var(--font-heading)', fontSize: 18 }}>Order Status</h3>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        {steps.map((step, i) => {
-                            const Icon = step.icon;
-                            const done = i <= currentIdx;
-                            return (
-                                <div key={step.status} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, flex: 1 }}>
-                                    <div style={{
-                                        width: 48,
-                                        height: 48,
-                                        borderRadius: '50%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        background: done ? 'var(--color-primary)' : 'var(--color-bg-secondary)',
-                                        color: done ? 'white' : 'var(--color-text-muted)',
-                                        border: done ? 'none' : '2px solid var(--color-border)',
-                                        transition: 'all 0.3s ease'
-                                    }}>
-                                        <Icon size={22} />
+
+                    {order.status === 'PENDING_CASH' ? (
+                        <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                            <div style={{ width: 64, height: 64, background: '#FFF4E5', color: '#B95000', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                                <span style={{ fontSize: 32 }}>💵</span>
+                            </div>
+                            <h3 style={{ color: '#B95000', marginBottom: 8, fontSize: 18 }}>Payment Pending</h3>
+                            <p style={{ color: 'var(--color-text-secondary)', marginBottom: 24 }}>Please proceed to the counter to pay <b>{formatPrice(order.totalAmount)}</b>.</p>
+                            <div style={{ fontSize: 13, background: 'var(--color-bg-secondary)', padding: 12, borderRadius: 8, color: 'var(--color-text-muted)' }}>
+                                Show Order <b>#{orderId?.slice(-6)}</b> to the cashier
+                            </div>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            {steps.map((step, i) => {
+                                const Icon = step.icon;
+                                const done = i <= currentIdx;
+                                return (
+                                    <div key={step.status} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, flex: 1 }}>
+                                        <div style={{
+                                            width: 48,
+                                            height: 48,
+                                            borderRadius: '50%',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            background: done ? 'var(--color-primary)' : 'var(--color-bg-secondary)',
+                                            color: done ? 'white' : 'var(--color-text-muted)',
+                                            border: done ? 'none' : '2px solid var(--color-border)',
+                                            transition: 'all 0.3s ease'
+                                        }}>
+                                            <Icon size={22} />
+                                        </div>
+                                        <span style={{ fontSize: 12, fontWeight: 600, color: done ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}>{step.label}</span>
                                     </div>
-                                    <span style={{ fontSize: 12, fontWeight: 600, color: done ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}>{step.label}</span>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
 
                 {/* Order Items */}

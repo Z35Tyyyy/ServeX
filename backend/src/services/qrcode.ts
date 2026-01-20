@@ -5,7 +5,7 @@ export const generateQRCodeDataURL = async (data: string): Promise<string> => {
 };
 
 export const generateTableQRUrl = (tableId: string): string => {
-    const baseUrl = process.env.BASE_URL || 'http://localhost:5173';
+    const baseUrl = process.env.BASE_URL || 'https://serve-x-rose.vercel.app';
     return `${baseUrl}/t/${tableId}`;
 };
 

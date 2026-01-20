@@ -6,6 +6,7 @@ import { getKitchenOrders, updateOrderStatus } from '../../lib/api';
 import { getSocket, connectSocket, joinKitchen, leaveKitchen } from '../../lib/socket';
 import { useAuthStore } from '../../store/authStore';
 import { timeAgo } from '../../lib/utils';
+import Footer from '../../components/Footer';
 
 interface Order { _id: string; tableId: { tableNumber: number }; items: { name: string; quantity: number; specialInstructions?: string }[]; status: 'PAID' | 'PREPARING' | 'READY' | 'SERVED'; createdAt: string; }
 
@@ -39,7 +40,7 @@ export default function KitchenDashboard() {
     const getNext = (s: string) => ({ PAID: 'PREPARING', PREPARING: 'READY', READY: 'SERVED' }[s]);
 
     return (
-        <div style={{ minHeight: '100vh', background: 'var(--gradient-dark)' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--gradient-dark)', display: 'flex', flexDirection: 'column' }}>
             {/* Background */}
             <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'var(--gradient-mesh)', pointerEvents: 'none' }} />
 
@@ -74,7 +75,7 @@ export default function KitchenDashboard() {
             </div>
 
             {/* Orders */}
-            <main style={{ padding: 24, position: 'relative' }}>
+            <main style={{ padding: 24, position: 'relative', flex: 1 }}>
                 {loading ? (
                     <div style={{ display: 'flex', justifyContent: 'center', padding: 64, color: 'var(--color-text-muted)' }}><ChefHat className="animate-spin" size={48} /></div>
                 ) : orders.length === 0 ? (
@@ -84,7 +85,7 @@ export default function KitchenDashboard() {
                         <p style={{ color: 'var(--color-text-muted)' }}>New orders will appear here in real-time</p>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
                         {orders.map((order, idx) => {
                             const config = statusConfig[order.status];
                             return (
@@ -124,6 +125,7 @@ export default function KitchenDashboard() {
                     </div>
                 )}
             </main>
+            <Footer />
         </div>
     );
 }

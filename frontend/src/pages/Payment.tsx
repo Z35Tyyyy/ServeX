@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CreditCard, Loader2, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
-import { getOrder, createPayment, verifyPayment } from '../lib/api';
+import { getOrder, createPayment, verifyPayment, confirmCashPayment } from '../lib/api';
 import { useCartStore } from '../store/cartStore';
 import { formatPrice } from '../lib/utils';
 
@@ -104,6 +104,33 @@ export default function Payment() {
                     ) : (
                         `Pay ${formatPrice(order?.totalAmount || 0)}`
                     )}
+                </button>
+
+                <div style={{ position: 'relative', margin: '20px 0', textAlign: 'center' }}>
+                    <div style={{ height: 1, background: 'var(--color-border)', position: 'absolute', top: '50%', left: 0, right: 0 }}></div>
+                    <span style={{ background: 'var(--color-bg-primary)', padding: '0 10px', color: 'var(--color-text-muted)', fontSize: 13, position: 'relative' }}>OR</span>
+                </div>
+
+                <button
+                    onClick={async () => {
+                        if (!order || !orderId) return;
+                        if (!confirm('Proceed to pay at counter? Your order will be sent to the kitchen immediately.')) return;
+                        setState('processing');
+                        try {
+                            await confirmCashPayment(orderId);
+                            setState('success');
+                            clearCart();
+                            setTimeout(() => navigate(`/order/${orderId}`), 2000);
+                        } catch (e: any) {
+                            setError(e.response?.data?.message || 'Failed to confirm order');
+                            setState('failed');
+                        }
+                    }}
+                    disabled={state === 'processing'}
+                    className="btn btn-secondary btn-lg"
+                    style={{ width: '100%', padding: 18, fontSize: 16, borderRadius: 999 }}
+                >
+                    Pay at Counter 💵
                 </button>
 
                 <p style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: 'var(--color-text-muted)' }}>

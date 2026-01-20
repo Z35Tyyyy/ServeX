@@ -12,6 +12,7 @@ import TableManagement from './pages/admin/TableManagement';
 import Orders from './pages/admin/Orders';
 import Analytics from './pages/admin/Analytics';
 import KitchenDashboard from './pages/kitchen/Dashboard';
+import CustomerLayout from './components/CustomerLayout';
 
 function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: string[] }) {
     const { user, token } = useAuthStore();
@@ -23,11 +24,13 @@ function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode;
 export default function App() {
     return (
         <Routes>
-            <Route path="/t/:tableId" element={<TableLanding />} />
-            <Route path="/menu/:tableId" element={<Menu />} />
-            <Route path="/cart/:tableId" element={<Cart />} />
-            <Route path="/payment/:orderId" element={<Payment />} />
-            <Route path="/order/:orderId" element={<OrderTracking />} />
+            <Route element={<CustomerLayout />}>
+                <Route path="/t/:tableId" element={<TableLanding />} />
+                <Route path="/menu/:tableId" element={<Menu />} />
+                <Route path="/cart/:tableId" element={<Cart />} />
+                <Route path="/payment/:orderId" element={<Payment />} />
+                <Route path="/order/:orderId" element={<OrderTracking />} />
+            </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/kitchen" element={<ProtectedRoute allowedRoles={['admin', 'kitchen']}><KitchenDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminLayout /></ProtectedRoute>}>
